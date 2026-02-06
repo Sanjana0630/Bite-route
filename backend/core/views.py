@@ -162,18 +162,24 @@ def login(request):
     password = request.data.get("password")
 
     if not contact or not password:
-        return Response({"message": "All fields are required"}, status=400)
+        return Response(
+            {"message": "All fields are required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-    try:
-        user = User.objects.get(contact=contact)
-        
-        # Check password (hashed)
-        if not check_password(password, user.password):
-            return Response({"message": "Invalid credentials"}, status=401)
-            
-        token = generate_token(user.id, "user")
-            
-        return Response({
+    # Authenticate using contact as username
+    user = authenticate(username=contact, password=password)
+
+    if user is None:
+        return Response(
+            {"message": "Invalid credentials"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    token = generate_token(user.id, "user")
+
+    return Response(
+        {
             "message": "Login successful",
             "token": token,
             "user": {
@@ -181,11 +187,9 @@ def login(request):
                 "name": user.name,
                 "contact": user.contact
             }
-        })
-    except User.DoesNotExist:
-        return Response({"message": "Invalid credentials"}, status=401)
-
-
+        },
+        status=status.HTTP_200_OK
+    )
 # ================= HOTEL OWNER =================
 
 @api_view(["POST"])
