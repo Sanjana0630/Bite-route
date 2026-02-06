@@ -255,10 +255,9 @@ def common_login(request):
     # 1. Check Admin
     admin_email = os.getenv("ADMIN_EMAIL")
     admin_password = os.getenv("ADMIN_PASSWORD")
-    
 
     if contact == admin_email and password == admin_password:
-        token = generate_token(999, "admin")  # Generate token for admin
+        token = generate_token(999, "admin")
         return Response({
             "message": "Admin login successful",
             "role": "admin",
@@ -266,18 +265,12 @@ def common_login(request):
             "user": {"name": "Admin", "id": 999}
         })
 
-    # 2. Check User
+    # 2. Check User (Manual DB Lookup)
     try:
-        # Case insensitive contact match
         user = User.objects.get(contact__iexact=contact)
-        
-        # Verify password (hashed)
-        # Assuming plain text check first based on previous D: drive code, 
-        # BUT C: drive code uses hash_password/check_password.
-        # Let's check if password matches hashed.
         if check_password(password, user.password):
-             token = generate_token(user.id, "user")
-             return Response({
+            token = generate_token(user.id, "user")
+            return Response({
                 "message": "Login successful",
                 "role": "user",
                 "token": token,
@@ -287,16 +280,12 @@ def common_login(request):
                     "contact": user.contact
                 }
             })
-        print("❌ User found but password mismatch")
-        
     except User.DoesNotExist:
-        print("❌ User not found")
-        pass
+        pass  # Continue to check HotelOwner
 
-    # 3. Check Hotel Owner
+    # 3. Check Hotel Owner (Manual DB Lookup)
     try:
         owner = HotelOwner.objects.get(contact__iexact=contact)
-        
         if check_password(password, owner.password):
             token = generate_token(owner.id, "owner")
             return Response({
@@ -309,13 +298,10 @@ def common_login(request):
                     "contact": owner.contact
                 }
             })
-        print("❌ HotelOwner found but password mismatch")
-
     except HotelOwner.DoesNotExist:
-        print("❌ HotelOwner not found")
         pass
 
-    return Response({"message": "Invalid credentials found"}, status=401)
+    return Response({"message": "Invalid credentials"}, status=401)
 
 
 # ================= HOTEL DETAILS (Register hotel for approval) =================
