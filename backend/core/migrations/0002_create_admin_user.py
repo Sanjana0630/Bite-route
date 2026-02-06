@@ -5,11 +5,14 @@ def create_admin_user(apps, schema_editor):
     User = apps.get_model('auth', 'User')
 
     if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser(
+        user = User.objects.create(
             username='admin',
             email='admin@example.com',
-            password='Admin@123'
+            is_staff=True,
+            is_superuser=True
         )
+        user.set_password('Admin@123')
+        user.save()
 
 
 class Migration(migrations.Migration):
