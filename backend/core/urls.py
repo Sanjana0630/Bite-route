@@ -6,7 +6,7 @@ urlpatterns = [
 
     # USER
     path("users/register/", views.register),
-    path("users/login/", views.login),
+    path("api/users/login/", views.login),
     path("user/search-food/", views.user_search_food),
     path("common/login/", views.common_login),
 
