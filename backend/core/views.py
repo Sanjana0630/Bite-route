@@ -19,7 +19,8 @@ from .serializers import (
     OrderSerializer, OrderItemSerializer
 )
 from .auth_utils import hash_password, check_password, generate_token
-
+from django.http import HttpResponse
+from django.contrib.auth import get_user_model
 
 # ================= ADMIN =================
 
@@ -791,3 +792,17 @@ def delete_food(request, food_id):
     except Food.DoesNotExist:
         return Response({"message": "Food item not found"}, status=404)
 
+
+def reset_admin_password(request):
+    User = get_user_model()
+    user = User.objects.filter(username="admin").first()
+
+    if not user:
+        return HttpResponse("Admin user not found")
+
+    user.set_password("Admin@123")
+    user.is_staff = True
+    user.is_superuser = True
+    user.save()
+
+    return HttpResponse("Admin password reset successfully")

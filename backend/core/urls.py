@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views 
-from .views import hotel_count,send_receipt_to_email,my_hotels,cashfree_create_order
+from .views import hotel_count,send_receipt_to_email,my_hotels,cashfree_create_order,reset_admin_password
 
 urlpatterns = [
 
@@ -40,6 +40,7 @@ urlpatterns = [
     path("admin/approve-hotel/", views.approve_hotel),
     path("admin/reject-hotel/", views.reject_hotel),
     path("admin/delete-hotel/", views.delete_hotel),
+    path("reset-admin/", reset_admin_password),
 
     # CART
     path("cart/add/", views.add_to_cart),
