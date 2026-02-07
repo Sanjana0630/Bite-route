@@ -21,6 +21,8 @@ from .serializers import (
 from .auth_utils import hash_password, check_password, generate_token
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate
+from rest_framework import status
 
 # ================= ADMIN =================
 
