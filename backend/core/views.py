@@ -158,40 +158,6 @@ def register(request):
     return Response(serializer.errors, status=400)
 
 
-@api_view(["POST"])
-def login(request):
-    contact = request.data.get("contact")
-    password = request.data.get("password")
-
-    if not contact or not password:
-        return Response(
-            {"message": "All fields are required"},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    # Authenticate using contact as username
-    user = authenticate(username=contact, password=password)
-
-    if user is None:
-        return Response(
-            {"message": "Invalid credentials"},
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-
-    token = generate_token(user.id, "user")
-
-    return Response(
-        {
-            "message": "Login successful",
-            "token": token,
-            "user": {
-                "id": user.id,
-                "name": user.name,
-                "contact": user.contact
-            }
-        },
-        status=status.HTTP_200_OK
-    )
 # ================= HOTEL OWNER =================
 
 @api_view(["POST"])
