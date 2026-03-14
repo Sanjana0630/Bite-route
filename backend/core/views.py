@@ -214,62 +214,68 @@ def hotel_login(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def common_login(request):
-    contact = request.data.get("contact")
-    password = request.data.get("password")
-
-    if not contact or not password:
-        return Response({"message": "All fields are required"}, status=400)
-
-    # 1. Check Admin
-    admin_email = os.getenv("ADMIN_EMAIL")
-    admin_password = os.getenv("ADMIN_PASSWORD")
-
-    if contact == admin_email and password == admin_password:
-        token = generate_token(999, "admin")
-        return Response({
-            "message": "Admin login successful",
-            "role": "admin",
-            "token": token,
-            "user": {"name": "Admin", "id": 999}
-        })
-
-    # 2. Check User (Manual DB Lookup)
     try:
-        user = User.objects.get(contact__iexact=contact)
-        if check_password(password, user.password):
-            token = generate_token(user.id, "user")
-            return Response({
-                "message": "Login successful",
-                "role": "user",
-                "token": token,
-                "user": {
-                    "id": user.id,
-                    "name": user.name,
-                    "contact": user.contact
-                }
-            })
-    except User.DoesNotExist:
-        pass  # Continue to check HotelOwner
+        contact = request.data.get("contact")
+        password = request.data.get("password")
 
-    # 3. Check Hotel Owner (Manual DB Lookup)
-    try:
-        owner = HotelOwner.objects.get(contact__iexact=contact)
-        if check_password(password, owner.password):
-            token = generate_token(owner.id, "owner")
-            return Response({
-                "message": "Login successful",
-                "role": "hotel",
-                "token": token,
-                "owner": {
-                    "id": owner.id,
-                    "username": owner.username,
-                    "contact": owner.contact
-                }
-            })
-    except HotelOwner.DoesNotExist:
-        pass
+        if not contact or not password:
+            return Response({"message": "All fields are required"}, status=400)
 
-    return Response({"message": "Invalid credentials"}, status=401)
+        # 1. Check Admin
+        admin_email = os.getenv("ADMIN_EMAIL")
+        admin_password = os.getenv("ADMIN_PASSWORD")
+
+        if contact == admin_email and password == admin_password:
+            token = generate_token(999, "admin")
+            return Response({
+                "message": "Admin login successful",
+                "role": "admin",
+                "token": token,
+                "user": {"name": "Admin", "id": 999}
+            })
+
+        # 2. Check User (Manual DB Lookup)
+        try:
+            user = User.objects.get(contact__iexact=contact)
+            if check_password(password, user.password):
+                token = generate_token(user.id, "user")
+                return Response({
+                    "message": "Login successful",
+                    "role": "user",
+                    "token": token,
+                    "user": {
+                        "id": user.id,
+                        "name": user.name,
+                        "contact": user.contact
+                    }
+                })
+        except User.DoesNotExist:
+            pass  # Continue to check HotelOwner
+
+        # 3. Check Hotel Owner (Manual DB Lookup)
+        try:
+            owner = HotelOwner.objects.get(contact__iexact=contact)
+            if check_password(password, owner.password):
+                token = generate_token(owner.id, "owner")
+                return Response({
+                    "message": "Login successful",
+                    "role": "hotel",
+                    "token": token,
+                    "owner": {
+                        "id": owner.id,
+                        "username": owner.username,
+                        "contact": owner.contact
+                    }
+                })
+        except HotelOwner.DoesNotExist:
+            pass
+
+        return Response({"message": "Invalid credentials"}, status=401)
+    except Exception as e:
+        import traceback
+        print("❌ LOGIN ERROR:", str(e))
+        traceback.print_exc()
+        return Response({"message": f"Server error during login: {str(e)}"}, status=500)
 
 
 # ================= HOTEL DETAILS (Register hotel for approval) =================
