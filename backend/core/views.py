@@ -347,32 +347,31 @@ def check_hotel_status(request):
             status=400
         )
 
-    try:
-        # ✅ Ensure it belongs to the logged-in owner
-        hotel = Hotel.objects.get(hotel_name__iexact=hotel_name, owner=request.user)
+    # ✅ Ensure it belongs to the logged-in owner
+    hotel = Hotel.objects.filter(hotel_name__iexact=hotel_name, owner=request.user).first()
 
-        if hotel.rejected:
-            return Response({
-                "status": "rejected",
-                "message": "❌ Hotel rejected by admin"
-            })
-
-        if hotel.approved:
-            return Response({
-                "status": "approved",
-                "message": "✅ Your hotel is approved by admin"
-            })
-
-        return Response({
-            "status": "pending",
-            "message": "⏳ Your hotel approval is pending"
-        })
-
-    except Hotel.DoesNotExist:
+    if not hotel:
         return Response({
             "status": "not_found",
             "message": "Hotel not found. Please register your hotel first"
         }, status=404)
+
+    if hotel.rejected:
+        return Response({
+            "status": "rejected",
+            "message": "❌ Hotel rejected by admin"
+        })
+
+    if hotel.approved:
+        return Response({
+            "status": "approved",
+            "message": "✅ Your hotel is approved by admin"
+        })
+
+    return Response({
+        "status": "pending",
+        "message": "⏳ Your hotel approval is pending"
+    })
 
 
 #to add food item
