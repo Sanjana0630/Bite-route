@@ -84,14 +84,7 @@ function Navbar() {
       <div className="collapse navbar-collapse" id="navbarNav">
         <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-3">
 
-          {/* HOME */}
-          {user && (
-            <li className="nav-item">
-              <Link className="nav-link" to="/home">
-                Home
-              </Link>
-            </li>
-          )}
+
 
           {/* USER CART */}
           {role === "user" && (
